@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Menu, Search, LogOut } from 'lucide-react';
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const { profile, session } = useAuthStore();
   const router = useRouter();
 
@@ -17,7 +17,10 @@ export default function Header() {
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-40 print:hidden shadow-sm">
       <div className="flex items-center gap-4">
-        <button className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+        <button 
+          onClick={onMenuClick}
+          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        >
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
