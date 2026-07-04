@@ -6,7 +6,7 @@ import { useAuthStore } from '@/lib/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function AuthProvider({ children }) {
-  const { setSession, setProfile, setIsLoading } = useAuthStore();
+  const { setSession, setProfile, setLoading } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -47,7 +47,7 @@ export default function AuthProvider({ children }) {
       } catch (error) {
         console.error('Auth init error:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -74,7 +74,7 @@ export default function AuthProvider({ children }) {
           router.push('/login');
         }
       }
-      setIsLoading(false);
+      setLoading(false);
     });
     
     authSubscription = data.subscription;
@@ -84,7 +84,7 @@ export default function AuthProvider({ children }) {
         authSubscription.unsubscribe();
       }
     };
-  }, [setSession, setProfile, setIsLoading, router, pathname]);
+  }, [setSession, setProfile, setLoading, router, pathname]);
 
   if (!mounted) return null;
 
