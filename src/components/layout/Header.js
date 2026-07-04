@@ -38,9 +38,9 @@ export default function Header({ title, onMenuClick, isSidebarOpen, closeMenu })
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Logo Placeholder */}
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-600 text-white font-bold text-xl italic shadow-md">
-            V
+          {/* Company Logo */}
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-sm overflow-hidden border border-gray-100 shrink-0">
+            <img src="/logo.png" alt="Vijaya Products Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-2">

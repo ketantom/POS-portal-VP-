@@ -44,7 +44,7 @@ export const useCartStore = create((set, get) => ({
     const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * item.qty), 0);
     
     // Tax calculation
-    const tax = isTaxEnabled ? (subtotal * 0.18) : 0; 
+    const tax = isTaxEnabled ? (subtotal * 0.05) : 0; 
     
     // Discount calculation
     const appliedDiscount = isDiscountEnabled ? discount : 0;

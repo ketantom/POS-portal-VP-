@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCartStore } from '@/lib/store/useCartStore';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { supabase } from '@/lib/supabase/client';
-import { Trash2, Minus, Plus } from 'lucide-react';
+import { Trash2, Minus, Plus, Receipt as ReceiptIcon, Printer } from 'lucide-react';
+import Receipt from './Receipt';
 
 export default function Cart() {
   const { 
@@ -87,16 +88,42 @@ export default function Cart() {
 
       if (itemsError) throw itemsError;
 
-      alert('Transaction Completed Successfully!');
-      clearCart();
-      setPaymentMethod('Cash');
-      setReceivingAccount('');
+      setLastOrder({
+        items: items.map(i => ({ name: i.name, quantity: i.qty, price: i.price })),
+        subtotal,
+        tax,
+        discount: appliedDiscount,
+        total,
+        paymentMethod,
+        orderId: sale.id.split('-')[0].toUpperCase()
+      });
+      setShowPrintDialog(true);
+      
     } catch (err) {
       console.error('Checkout error:', err);
       alert('Failed to process checkout: ' + err.message);
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleFinishPrint = () => {
+    window.print();
+    setTimeout(() => {
+      setShowPrintDialog(false);
+      clearCart();
+      setPaymentMethod('Cash');
+      setReceivingAccount('');
+      setLastOrder(null);
+    }, 500);
+  };
+
+  const handleSkipPrint = () => {
+    setShowPrintDialog(false);
+    clearCart();
+    setPaymentMethod('Cash');
+    setReceivingAccount('');
+    setLastOrder(null);
   };
 
   return (
@@ -175,7 +202,7 @@ export default function Cart() {
                 onChange={(e) => setIsTaxEnabled(e.target.checked)}
                 className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
               />
-              Tax (18% GST)
+              Tax (5% GST)
             </label>
             <span className="font-medium text-gray-900">₹{tax.toFixed(2)}</span>
           </div>
@@ -266,6 +293,38 @@ export default function Cart() {
           {isProcessing ? 'Processing...' : 'Complete Checkout'}
         </button>
       </div>
+      {/* Print Overlay */}
+      {showPrintDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm print:hidden p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ReceiptIcon className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Checkout Complete!</h2>
+            <p className="text-gray-500 mb-8">Would you like to print a receipt for this transaction?</p>
+            
+            <div className="space-y-3">
+              <button 
+                onClick={handleFinishPrint}
+                className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition"
+              >
+                <Printer className="w-5 h-5" /> Print Receipt
+              </button>
+              <button 
+                onClick={handleSkipPrint}
+                className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Thermal Receipt */}
+      {showPrintDialog && lastOrder && (
+        <Receipt {...lastOrder} />
+      )}
     </div>
   );
 }
