@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCartStore } from '@/lib/store/useCartStore';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { supabase } from '@/lib/supabase/client';
-import { Trash2, Minus, Plus, Receipt as ReceiptIcon, Printer } from 'lucide-react';
+import { Minus, Receipt as ReceiptIcon, Printer } from 'lucide-react';
 import Receipt from './Receipt';
 
 export default function Cart() {
@@ -14,10 +14,7 @@ export default function Cart() {
     setDiscount,
     isTaxEnabled,
     setIsTaxEnabled,
-    isDiscountEnabled,
-    setIsDiscountEnabled,
     updateQuantity, 
-    removeItem, 
     clearCart, 
     getTotals 
   } = useCartStore();
@@ -30,8 +27,11 @@ export default function Cart() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [availableAccounts, setAvailableAccounts] = useState([]);
 
+  // Print Dialog State
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [lastOrder, setLastOrder] = useState(null);
+
   useEffect(() => {
-    // Fetch accounts when UPI is selected
     if (paymentMethod === 'UPI/QR') {
       fetchAccounts();
     } else {
@@ -40,13 +40,9 @@ export default function Cart() {
   }, [paymentMethod]);
 
   async function fetchAccounts() {
-    // Try to fetch from accounts table. If it doesn't exist yet, we'll gracefully fallback
     const { data, error } = await supabase.from('accounts').select('*').order('name');
     if (!error && data) {
       setAvailableAccounts(data);
-    } else {
-      // Fallback dummy data if table not created yet
-      setAvailableAccounts([{ id: 1, name: 'HDFC Current' }, { id: 2, name: 'PhonePe QR' }]);
     }
   }
 
@@ -88,6 +84,7 @@ export default function Cart() {
 
       if (itemsError) throw itemsError;
 
+      // Prepare order for printing
       setLastOrder({
         items: items.map(i => ({ name: i.name, quantity: i.qty, price: i.price })),
         subtotal,
@@ -98,7 +95,7 @@ export default function Cart() {
         orderId: sale.id.split('-')[0].toUpperCase()
       });
       setShowPrintDialog(true);
-      
+
     } catch (err) {
       console.error('Checkout error:', err);
       alert('Failed to process checkout: ' + err.message);
@@ -107,18 +104,16 @@ export default function Cart() {
     }
   };
 
-  const handleFinishPrint = () => {
+  const finishPrint = () => {
     window.print();
-    setTimeout(() => {
-      setShowPrintDialog(false);
-      clearCart();
-      setPaymentMethod('Cash');
-      setReceivingAccount('');
-      setLastOrder(null);
-    }, 500);
+    setTimeout(resetCart, 500);
   };
 
-  const handleSkipPrint = () => {
+  const skipPrint = () => {
+    resetCart();
+  };
+
+  const resetCart = () => {
     setShowPrintDialog(false);
     clearCart();
     setPaymentMethod('Cash');
@@ -127,7 +122,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-96 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden shrink-0">
+    <div className="w-full md:w-80 lg:w-[350px] flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden shrink-0">
       <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
         <h3 className="font-bold text-gray-800">Current Order</h3>
         {items.length > 0 && (
@@ -135,164 +130,120 @@ export default function Cart() {
         )}
       </div>
       
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-2 bg-gray-50/30">
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-gray-400">
-            <span className="text-4xl block mb-3 opacity-50">🛒</span>
+            <span className="text-4xl block mb-3 opacity-30">🛒</span>
             <p className="text-sm font-medium">Cart is empty</p>
           </div>
         ) : (
           <div className="space-y-1">
             {items.map(item => (
-              <div key={item.sku} className="flex flex-col p-3 rounded-lg hover:bg-gray-50 transition group border border-transparent hover:border-gray-100">
+              <div key={item.sku} className="flex flex-col p-3 rounded-lg hover:bg-gray-50 transition border border-transparent hover:border-gray-100 bg-white shadow-sm mb-1">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 pr-2">
                     <h5 className="text-sm font-bold text-gray-800 leading-tight">{item.name}</h5>
                     <p className="text-xs text-gray-500 mt-0.5">₹{Number(item.price).toFixed(2)}</p>
                   </div>
-                  <span className="font-extrabold text-gray-800 text-sm">
+                  <span className="font-extrabold text-gray-900 text-sm">
                     ₹{(item.price * item.qty).toFixed(2)}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-3 bg-gray-100 rounded-md p-1 border border-gray-200">
+                  <div className="flex items-center gap-2 bg-gray-50 rounded-md p-1 border border-gray-200">
                     <button 
                       onClick={() => updateQuantity(item.sku, item.qty - 1)}
-                      className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-red-600 border border-gray-200"
+                      className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-red-600 border border-gray-200 transition-colors"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
                     <span className="text-xs font-bold w-4 text-center text-gray-800">{item.qty}</span>
                     <button 
                       onClick={() => updateQuantity(item.sku, item.qty + 1)}
-                      className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-green-600 border border-gray-200"
+                      className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-red-600 border border-gray-200 transition-colors"
                     >
-                      <Plus className="w-3 h-3" />
+                      <span className="font-bold leading-none mb-0.5">+</span>
                     </button>
                   </div>
-                  <button 
-                    onClick={() => removeItem(item.sku)}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-      
-      <div className="p-4 bg-gray-50 border-t border-gray-200 space-y-4">
-        
-        {/* Totals Section with Checkboxes */}
-        <div className="space-y-2 border-b border-gray-200 pb-4">
-          <div className="flex justify-between text-sm text-gray-600 items-center">
+
+      <div className="border-t border-gray-200 bg-white p-4 space-y-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+        <div className="space-y-2 text-sm font-medium text-gray-600">
+          <div className="flex justify-between items-center">
             <span>Subtotal</span>
-            <span className="font-medium text-gray-900">₹{subtotal.toFixed(2)}</span>
+            <span className="font-bold text-gray-800">₹{subtotal.toFixed(2)}</span>
           </div>
-          
-          {/* Tax Checkbox */}
-          <div className="flex justify-between text-sm text-gray-600 items-center">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+
+          <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
                 checked={isTaxEnabled}
                 onChange={(e) => setIsTaxEnabled(e.target.checked)}
                 className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
               />
-              Tax (5% GST)
+              <span className="font-bold text-gray-700">GST (5%)</span>
             </label>
-            <span className="font-medium text-gray-900">₹{tax.toFixed(2)}</span>
+            <span className="font-bold text-gray-800">₹{tax.toFixed(2)}</span>
           </div>
-          
-          {/* Discount Checkbox & Input */}
-          <div className="flex justify-between text-sm text-gray-600 items-center">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input 
-                type="checkbox" 
-                checked={isDiscountEnabled}
-                onChange={(e) => setIsDiscountEnabled(e.target.checked)}
-                className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
-              />
-              Discount (₹)
-            </label>
+
+          <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+            <span className="font-bold text-gray-700">Discount (₹)</span>
             <input 
               type="number" 
               min="0"
-              value={discount || ''}
-              onChange={(e) => setDiscount(Number(e.target.value) || 0)}
-              disabled={!isDiscountEnabled}
-              placeholder="0.00"
-              className="w-24 text-right bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-medium text-gray-900 disabled:bg-gray-100 disabled:text-gray-400"
+              value={discount}
+              onChange={(e) => setDiscount(Number(e.target.value))}
+              className="w-20 px-2 py-1 text-right border border-gray-300 rounded bg-white focus:outline-none focus:border-red-500 font-bold text-gray-800"
             />
-          </div>
-
-          <div className="pt-2 flex justify-between items-center">
-            <span className="font-bold text-gray-900">Total</span>
-            <span className="text-2xl font-extrabold text-gray-900">₹{total.toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Payment Method Selector */}
-        <div className="space-y-3">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Payment Method</label>
-          <div className="flex gap-2">
-            {['Cash', 'Card', 'UPI/QR'].map(method => (
-              <button
-                key={method}
-                onClick={() => {
-                  setPaymentMethod(method);
-                  setReceivingAccount('');
-                }}
-                className={`flex-1 py-2 rounded-md text-xs font-bold transition border ${
-                  paymentMethod === method
-                    ? 'bg-red-50 text-red-700 border-red-200 shadow-sm'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {method}
-              </button>
-            ))}
-          </div>
+        <div className="pt-2 border-t border-gray-200 flex justify-between items-end">
+          <span className="text-gray-500 font-bold">Total</span>
+          <span className="text-3xl font-black text-gray-900 tracking-tight">₹{total.toFixed(2)}</span>
+        </div>
 
-          {/* Conditional Accounts Dropdown for UPI/QR */}
+        <div className="space-y-2 pt-2">
+          <select 
+            value={paymentMethod} 
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-red-500 font-bold text-gray-800 cursor-pointer"
+          >
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="UPI/QR">UPI / QR Code</option>
+          </select>
+          
           {paymentMethod === 'UPI/QR' && (
-            <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-              <label className="text-xs font-medium text-gray-700">Select Receiving Account *</label>
-              <select
-                value={receivingAccount}
-                onChange={(e) => setReceivingAccount(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 text-gray-800"
-              >
-                <option value="" disabled>-- Choose Account --</option>
-                {availableAccounts.map(acc => (
-                  <option key={acc.name} value={acc.name}>{acc.name}</option>
-                ))}
-              </select>
-            </div>
+            <select 
+              value={receivingAccount} 
+              onChange={(e) => setReceivingAccount(e.target.value)}
+              className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-red-500 font-bold text-gray-800 cursor-pointer"
+            >
+              <option value="">Select Receiving Account</option>
+              {availableAccounts.map(acc => (
+                <option key={acc.id} value={acc.name}>{acc.name}</option>
+              ))}
+            </select>
           )}
 
-          {paymentMethod === 'Card' && (
-            <input
-              type="text"
-              placeholder="Card Machine / Ref No. (Optional)"
-              value={receivingAccount}
-              onChange={(e) => setReceivingAccount(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 text-gray-800"
-            />
-          )}
+          <button 
+            onClick={handleCheckout}
+            disabled={items.length === 0 || isProcessing}
+            className="w-full py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-red-500/30"
+          >
+            {isProcessing ? 'Processing...' : 'Charge'}
+          </button>
         </div>
-        
-        <button 
-          onClick={handleCheckout}
-          disabled={items.length === 0 || isProcessing || (paymentMethod === 'UPI/QR' && !receivingAccount)}
-          className="w-full py-3.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2"
-        >
-          {isProcessing ? 'Processing...' : 'Complete Checkout'}
-        </button>
       </div>
+
       {/* Print Overlay */}
       {showPrintDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm print:hidden p-4">
@@ -301,17 +252,17 @@ export default function Cart() {
               <ReceiptIcon className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Checkout Complete!</h2>
-            <p className="text-gray-500 mb-8">Would you like to print a receipt for this transaction?</p>
+            <p className="text-gray-500 mb-8 font-medium">Would you like to print a receipt for this transaction?</p>
             
             <div className="space-y-3">
               <button 
-                onClick={handleFinishPrint}
-                className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition"
+                onClick={finishPrint}
+                className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md shadow-red-500/30"
               >
                 <Printer className="w-5 h-5" /> Print Receipt
               </button>
               <button 
-                onClick={handleSkipPrint}
+                onClick={skipPrint}
                 className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition"
               >
                 Skip

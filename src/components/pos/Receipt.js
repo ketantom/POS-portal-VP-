@@ -1,98 +1,73 @@
+'use client';
+
 export default function Receipt({ items, subtotal, tax, discount, total, paymentMethod, orderId }) {
-  const date = new Date().toLocaleString();
-
+  // 58mm Thermal Printer styling via print media query
   return (
-    <div className="receipt-container hidden print:block text-black bg-white w-[58mm] mx-auto text-xs font-mono p-2">
-      <div className="text-center mb-4">
-        <h2 className="font-bold text-sm uppercase">Vijaya Products</h2>
-        <p className="text-[10px]">123 Market Street, City</p>
-        <p className="text-[10px]">GSTIN: 27AABCU9603R1ZX</p>
-        <p className="text-[10px] mt-1">Tel: +91 9876543210</p>
+    <div className="hidden print:block print:w-[58mm] print:text-black font-mono text-[11px] leading-[1.2] p-1 pb-4">
+      {/* Header */}
+      <div className="text-center border-b border-black border-dashed pb-2 mb-2">
+        <h1 className="font-bold text-[14px]">VIJAYA PRODUCTS</h1>
+        <p>123 Main Street</p>
+        <p>City, State 12345</p>
+        <p>Ph: 123-456-7890</p>
+        <p>GSTIN: 29XXXXX1234X1ZX</p>
+        <div className="mt-1 pt-1 border-t border-black border-dashed">
+          <p>Order: #{orderId}</p>
+          <p>Date: {new Date().toLocaleString()}</p>
+        </div>
       </div>
 
-      <div className="border-t border-b border-black border-dashed py-2 mb-2 text-[10px]">
+      {/* Items List */}
+      <div className="w-full">
+        <div className="flex justify-between border-b border-black pb-1 mb-1 font-bold">
+          <span className="flex-1">Item</span>
+          <span className="w-8 text-right">Qty</span>
+          <span className="w-12 text-right">Amt</span>
+        </div>
+        
+        {items.map((item, idx) => (
+          <div key={idx} className="flex justify-between mb-1">
+            <span className="flex-1 truncate pr-1">{item.name}</span>
+            <span className="w-8 text-right">{item.quantity}</span>
+            <span className="w-12 text-right">{Number(item.price * item.quantity).toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Totals */}
+      <div className="border-t border-black border-dashed mt-2 pt-2">
         <div className="flex justify-between">
-          <span>Date:</span>
-          <span>{date}</span>
-        </div>
-        <div className="flex justify-between mt-1">
-          <span>Order #:</span>
-          <span>{orderId || '0001'}</span>
-        </div>
-      </div>
-
-      <table className="w-full text-[10px] mb-2">
-        <thead>
-          <tr className="border-b border-black">
-            <th className="text-left font-normal pb-1">Item</th>
-            <th className="text-center font-normal pb-1">Qty</th>
-            <th className="text-right font-normal pb-1">Amt</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, i) => (
-            <tr key={i}>
-              <td className="py-1 pr-1 truncate max-w-[30mm]">{item.name}</td>
-              <td className="text-center py-1">{item.quantity}</td>
-              <td className="text-right py-1">{(item.price * item.quantity).toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="border-t border-black border-dashed pt-2 text-[10px]">
-        <div className="flex justify-between mb-1">
           <span>Subtotal:</span>
-          <span>{subtotal.toFixed(2)}</span>
+          <span>{Number(subtotal).toFixed(2)}</span>
         </div>
-        {discount > 0 && (
-          <div className="flex justify-between mb-1">
+        {Number(discount) > 0 && (
+          <div className="flex justify-between">
             <span>Discount:</span>
-            <span>-{discount.toFixed(2)}</span>
+            <span>-{Number(discount).toFixed(2)}</span>
           </div>
         )}
-        {tax > 0 && (
-          <div className="flex justify-between mb-1">
-            <span>CGST/SGST (5%):</span>
-            <span>{tax.toFixed(2)}</span>
+        {Number(tax) > 0 && (
+          <div className="flex justify-between">
+            <span>GST (5%):</span>
+            <span>{Number(tax).toFixed(2)}</span>
           </div>
         )}
-        <div className="flex justify-between font-bold text-sm mt-2 border-t border-black pt-1">
+        
+        <div className="flex justify-between font-bold text-[13px] border-t border-black border-solid mt-1 pt-1">
           <span>TOTAL:</span>
-          <span>Rs. {total.toFixed(2)}</span>
+          <span>₹{Number(total).toFixed(2)}</span>
         </div>
       </div>
 
-      <div className="mt-4 text-center text-[10px]">
-        <p>Paid via: {paymentMethod.toUpperCase()}</p>
+      {/* Footer */}
+      <div className="text-center mt-3 pt-2 border-t border-black border-dashed">
+        <p>Paid via: {paymentMethod}</p>
         <p className="mt-2 font-bold">*** THANK YOU ***</p>
-        <p className="mt-1">Visit Again!</p>
+        <p>Please come again!</p>
       </div>
       
-      {/* 
-        IMPORTANT CSS INJECTION FOR PRINTING
-        This ensures the browser formats exactly to 58mm thermal paper 
-      */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @media print {
-          @page {
-            margin: 0;
-            size: 58mm auto;
-          }
-          body * {
-            visibility: hidden;
-          }
-          .receipt-container, .receipt-container * {
-            visibility: visible;
-          }
-          .receipt-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 58mm;
-          }
-        }
-      `}} />
+      {/* Space for paper tear */}
+      <div className="h-8"></div>
     </div>
   );
 }

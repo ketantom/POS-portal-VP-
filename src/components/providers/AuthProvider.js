@@ -1,71 +1,92 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function AuthProvider({ children }) {
-  const { setSession, setProfile, setLoading } = useAuthStore();
+  const { setSession, setProfile, setIsLoading } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    let mounted = true;
+    setMounted(true);
+    let authSubscription;
 
-    async function fetchProfile(userId) {
+    const initializeAuth = async () => {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) throw error;
-        if (mounted) setProfile(data);
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        if (mounted) setProfile(null);
-      }
-    }
+        if (sessionError) throw sessionError;
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        setSession(session);
-        if (session?.user) {
-          fetchProfile(session.user.id).finally(() => setLoading(false));
-        } else {
-          setLoading(false);
-          if (pathname !== '/login') router.push('/login');
-        }
-      }
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (mounted) {
+        if (session) {
           setSession(session);
-          if (session?.user) {
-            setLoading(true);
-            await fetchProfile(session.user.id);
-            setLoading(false);
-            if (pathname === '/login') router.push('/');
-          } else {
-            setProfile(null);
-            setLoading(false);
-            if (pathname !== '/login') router.push('/login');
+          
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (!profileError && profileData) {
+            setProfile(profileData);
+          }
+          
+          if (pathname === '/login') {
+            router.push('/');
+          }
+        } else {
+          setSession(null);
+          setProfile(null);
+          if (pathname !== '/login') {
+            router.push('/login');
           }
         }
+      } catch (error) {
+        console.error('Auth init error:', error);
+      } finally {
+        setIsLoading(false);
       }
-    );
+    };
+
+    initializeAuth();
+
+    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        setSession(session);
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        if (profileData) {
+          setProfile(profileData);
+        }
+        if (pathname === '/login') {
+          router.push('/');
+        }
+      } else {
+        setSession(null);
+        setProfile(null);
+        if (pathname !== '/login') {
+          router.push('/login');
+        }
+      }
+      setIsLoading(false);
+    });
+    
+    authSubscription = data.subscription;
 
     return () => {
-      mounted = false;
-      subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
-  }, [setSession, setProfile, setLoading, router, pathname]);
+  }, [setSession, setProfile, setIsLoading, router, pathname]);
+
+  if (!mounted) return null;
 
   return <>{children}</>;
 }
