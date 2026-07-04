@@ -50,41 +50,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleTestLogin = async () => {
-    setLoading(true);
-    try {
-      const uniqueEmail = `admin_${Date.now()}@pos.com`;
-      
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: uniqueEmail,
-        password: 'password123',
-      });
-      
-      if (signUpError) {
-        if (signUpError.message.includes('rate limit')) {
-          throw new Error('Supabase Rate Limit hit! Turn OFF "Confirm email" in Supabase.');
-        }
-        throw signUpError;
-      }
-      
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!currentSession) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: uniqueEmail,
-          password: 'password123',
-        });
-        if (signInError) throw signInError;
-      }
-      
-      router.push('/');
-    } catch (error) {
-      console.error(error);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -187,17 +153,6 @@ export default function LoginPage() {
             Sign in with Google
           </button>
 
-          {/* Test Login Button */}
-          <div className="pt-4 mt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={handleTestLogin}
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-all border border-gray-200 disabled:opacity-50"
-            >
-              🚀 Developer Bypass Login
-            </button>
-          </div>
         </div>
       </div>
     </div>
