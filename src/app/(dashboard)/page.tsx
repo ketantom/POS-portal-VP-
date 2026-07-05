@@ -194,44 +194,50 @@ export default function POSDashboard() {
   };
 
   return (
-    <div className="flex-1 p-4 flex flex-col md:flex-row gap-4 h-[calc(100vh-64px)] overflow-hidden">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-6 h-[calc(100vh-64px)] overflow-hidden bg-slate-50 relative z-0">
       
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-white to-transparent -z-10" />
+
       {/* Left Panel - Products */}
       <div className="w-full md:w-[60%] flex flex-col h-full overflow-hidden">
-        <div className="mb-4">
-          <div className="relative">
-            <span className="absolute left-3 top-2.5 text-[var(--text-light)]">🔍</span>
+        <div className="mb-6 relative z-20">
+          <div className="relative group">
+            <span className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </span>
             <input 
               type="text" 
               placeholder="Search products by name or SKU..." 
-              className="input pl-10 w-full bg-[var(--bg-white)]"
+              className="w-full bg-white border-2 border-transparent shadow-[0_2px_10px_rgb(0,0,0,0.04)] focus:border-red-400 focus:shadow-[0_4px_20px_rgb(220,38,38,0.1)] rounded-2xl pl-12 pr-12 py-3.5 text-sm outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-2.5 text-[var(--text-light)] hover:text-[var(--text-dark)]"
+                className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 rounded-full p-0.5"
               >
-                ✕
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 pb-20">
+        <div className="flex-1 overflow-y-auto pr-2 pb-20 custom-scrollbar relative z-10">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="skeleton skeleton-card"></div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-slate-200 animate-pulse rounded-2xl h-[160px]"></div>
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-[var(--text-muted)]">
-              No products found.
+            <div className="h-full flex flex-col items-center justify-center text-slate-400">
+               <div className="text-4xl mb-3 opacity-50">🔍</div>
+               <p className="font-medium">No products found.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
               {filteredProducts.map(product => (
                 <ProductCard 
                   key={product.id} 
@@ -242,7 +248,7 @@ export default function POSDashboard() {
             </div>
           )}
 
-          <div className="mt-8 border-t border-[var(--border)] pt-4">
+          <div className="mt-10 pt-6">
             <InvoiceHistory 
               invoices={recentInvoices} 
               onViewInvoice={handleViewInvoice}

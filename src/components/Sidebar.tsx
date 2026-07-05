@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm animate-fade-in transition-opacity"
           onClick={onClose}
         />
       )}
@@ -36,21 +36,21 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
       {/* Sidebar Panel */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-50 h-full w-80 bg-[var(--bg-white)] shadow-2xl transition-transform duration-300 ease-in-out',
+          'fixed top-0 right-0 z-50 h-full w-[340px] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-6">
-          <h2 className="text-lg font-bold text-[var(--text-dark)]">Settings Menu</h2>
+        <div className="flex h-20 items-center justify-between border-b border-slate-100 px-8">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">Settings</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-gray)] hover:text-[var(--text-dark)] transition-colors"
+            className="rounded-full p-2.5 text-slate-400 bg-slate-50 hover:bg-red-50 hover:text-red-500 transition-colors"
           >
-            ✕
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className="flex flex-col gap-2 p-6 flex-1 overflow-y-auto">
           {visibleMenuItems.map((item, index) => {
             const isActive = pathname === item.path;
             return (
@@ -59,28 +59,31 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                 href={item.path}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-4 rounded-2xl px-5 py-4 text-sm font-semibold transition-all duration-300',
                   isActive
-                    ? 'bg-[var(--primary-light)] text-[var(--primary-dark)] border-l-4 border-[var(--primary)]'
-                    : 'text-[var(--text-medium)] hover:bg-[var(--bg-gray)] hover:text-[var(--text-dark)] border-l-4 border-transparent hover:border-[var(--primary)]',
-                  isOpen && `animate-slide-in-right delay-[${index * 50}ms]`
+                    ? 'bg-red-50 text-red-600 shadow-[0_4px_20px_rgb(220,38,38,0.08)]'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
+                  isOpen && `animate-slide-in-right`
                 )}
                 style={{ animationFillMode: 'both', animationDelay: `${index * 50}ms` }}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className={cn("text-xl p-2 rounded-xl transition-colors", isActive ? "bg-white text-red-500 shadow-sm" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200")}>{item.icon}</span>
                 {item.label}
               </Link>
             );
           })}
         </nav>
         
-        <div className="absolute bottom-0 w-full p-6 text-center border-t border-[var(--border)]">
+        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
            <button onClick={async () => {
              const { createClient } = await import('@/lib/supabase/client');
              const supabase = createClient();
              await supabase.auth.signOut();
              window.location.href = '/login';
-           }} className="btn btn-ghost w-full">Sign Out</button>
+           }} className="w-full flex items-center justify-center gap-2 py-4 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+             Sign Out
+           </button>
         </div>
       </div>
     </>
