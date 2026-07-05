@@ -244,6 +244,16 @@ export default function POSDashboard() {
               ))}
             </div>
           )}
+
+          {/* Invoice History Section */}
+          <div className="mt-8 pt-8 border-t border-slate-200/50">
+            <InvoiceHistory 
+              invoices={recentInvoices} 
+              onViewInvoice={handleViewInvoice}
+              isLoading={isLoading}
+              onRefresh={loadData}
+            />
+          </div>
         </div>
       </div>
 
@@ -262,17 +272,11 @@ export default function POSDashboard() {
 
       {/* Receipt Modal */}
       {showReceipt && currentInvoice && (
-        <div className="modal-overlay">
-          <div className="relative bg-transparent max-h-[95vh] overflow-y-auto w-full flex flex-col items-center p-4 animate-scale-in">
-            <button 
-              onClick={() => setShowReceipt(false)}
-              className="absolute top-2 right-2 md:top-6 md:right-6 bg-white rounded-full p-2 text-gray-500 hover:text-red-500 shadow-lg z-50 hide-on-print"
-            >
-              ✕
-            </button>
-            <Receipt invoice={currentInvoice} items={currentInvoiceItems} />
-          </div>
-        </div>
+        <Receipt 
+          invoice={currentInvoice} 
+          items={currentInvoiceItems} 
+          onClose={() => setShowReceipt(false)} 
+        />
       )}
     </div>
   );

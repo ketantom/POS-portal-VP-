@@ -185,27 +185,40 @@ export default function CartPanel({
           </div>
         </div>
 
+        {/* Payment Methods (Tactile Pills) */}
+        <div className="flex flex-col gap-2 mt-2 border-t border-slate-200/50 pt-4">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Payment</span>
+          <div className="flex flex-wrap gap-2">
+            {paymentMethods.map(pm => (
+              <button
+                key={pm.id}
+                onClick={() => setPaymentMethod(pm.name)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 border",
+                  paymentMethod === pm.name 
+                    ? "bg-slate-900 text-white border-slate-900 shadow-[0_2px_10px_rgb(0,0,0,0.2)]" 
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                )}
+              >
+                {pm.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="flex gap-2 mt-2">
-          <select 
-            className="w-1/3 bg-white/60 border border-slate-200/50 rounded-xl px-3 text-xs outline-none focus:border-slate-400 font-bold text-slate-700 shadow-sm appearance-none text-center"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          >
-            {paymentMethods.map(pm => (
-              <option key={pm.id} value={pm.name}>{pm.name}</option>
-            ))}
-          </select>
           <button 
-            className="flex-1 py-3 text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 shadow-[0_4px_14px_rgb(0,0,0,0.2)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.25)] hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
+            className="flex-1 py-3.5 text-sm font-bold rounded-2xl text-white bg-rose-600 hover:bg-rose-700 shadow-[0_4px_14px_rgb(225,29,72,0.3)] hover:shadow-[0_6px_20px_rgb(225,29,72,0.4)] hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
             disabled={items.length === 0 || isLoading}
             onClick={handleGenerate}
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> 
+                Processing...
               </span>
-            ) : 'Checkout'}
+            ) : 'Checkout Order'}
           </button>
         </div>
       </div>

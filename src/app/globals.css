@@ -31,26 +31,42 @@
 
 /* Print Styles */
 @media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  
+  /* Hide EVERYTHING by default */
   body * {
     visibility: hidden;
   }
+  
+  /* Hide Next.js dev overlays if present */
+  nextjs-portal {
+    display: none !important;
+  }
+
+  /* Only show the print-receipt container */
   .print-receipt,
   .print-receipt * {
     visibility: visible !important;
   }
+  
   .print-receipt {
     position: absolute;
     top: 0;
     left: 0;
-    width: 48mm;
-    padding: 2mm;
-    font-size: 10px;
-    line-height: 1.3;
-    font-family: 'Courier New', monospace;
+    width: 58mm; /* Standard thermal printer width */
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    font-family: 'Courier New', Courier, monospace;
     color: #000 !important;
     background: #fff !important;
   }
-  .no-print {
+  
+  .hide-on-print {
     display: none !important;
   }
 }
