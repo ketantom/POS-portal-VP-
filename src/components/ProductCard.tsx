@@ -9,50 +9,50 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAdd }: ProductCardProps) {
-  // Generate a consistent vibrant color based on the product name length
   const colors = [
-    'from-red-500 to-rose-400 text-white',
-    'from-orange-500 to-amber-400 text-white',
-    'from-emerald-500 to-teal-400 text-white',
-    'from-blue-500 to-indigo-400 text-white',
-    'from-purple-500 to-fuchsia-400 text-white'
+    'from-rose-500/10 to-rose-50 text-rose-600',
+    'from-amber-500/10 to-amber-50 text-amber-600',
+    'from-emerald-500/10 to-emerald-50 text-emerald-600',
+    'from-indigo-500/10 to-indigo-50 text-indigo-600',
+    'from-violet-500/10 to-violet-50 text-violet-600'
   ];
   const colorIndex = product.name.length % colors.length;
   const gradientClass = colors[colorIndex];
   const initial = product.name.charAt(0).toUpperCase();
 
   return (
-    <div
+    <button
       onClick={() => onAdd(product)}
-      className="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[220px] hover:-translate-y-1 overflow-hidden"
+      className="group w-full text-left bg-white rounded-3xl p-4 border border-slate-200/60 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-slate-300/60 transition-all duration-300 ease-out active:scale-[0.97] flex flex-col gap-3 relative overflow-hidden"
     >
-      {/* Vibrant Header Placeholder */}
-      <div className={cn("h-28 w-full bg-gradient-to-tr flex items-center justify-center relative overflow-hidden", gradientClass)}>
-         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
-         <span className="text-4xl font-extrabold opacity-90 drop-shadow-md z-10">{initial}</span>
-         {/* Decorative circles */}
-         <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/20 rounded-full blur-sm" />
-         <div className="absolute top-2 -left-4 w-12 h-12 bg-white/20 rounded-full blur-sm" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-50 to-transparent opacity-50 rounded-bl-full pointer-events-none transition-transform duration-500 group-hover:scale-110" />
+
+      <div className="flex items-start justify-between z-10">
+        <div className={cn("w-12 h-12 rounded-2xl bg-gradient-to-tr flex items-center justify-center text-xl font-bold border border-white/50 shadow-sm", gradientClass)}>
+          {initial}
+        </div>
+        <div className="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg border border-slate-100">
+          {product.sku_code}
+        </div>
       </div>
-      
-      <div className="p-4 sm:p-5 flex flex-col flex-1">
-        <div className="flex-1">
-          <h3 className="font-bold text-slate-800 text-base sm:text-lg leading-snug line-clamp-2 group-hover:text-red-600 transition-colors">{product.name}</h3>
-          <p className="text-xs text-slate-400 mt-1.5 font-medium tracking-wide uppercase">{product.sku_code}</p>
+
+      <div className="mt-2 z-10">
+        <h3 className="font-semibold text-slate-800 text-sm leading-tight line-clamp-2 pr-2">{product.name}</h3>
+      </div>
+
+      <div className="mt-auto pt-2 flex items-end justify-between z-10">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-medium">Per {product.unit}</span>
+          <span className="font-extrabold text-slate-900 text-lg tracking-tight">
+            {formatCurrency(product.price)}
+          </span>
         </div>
         
-        <div className="mt-4 flex items-end justify-between">
-          <div>
-             <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Per {product.unit}</div>
-             <div className="font-extrabold text-slate-800 text-lg sm:text-xl">
-               {formatCurrency(product.price)}
-             </div>
-          </div>
-          <div className="bg-red-50 text-red-600 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md flex-shrink-0 group-hover:scale-110">
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-          </div>
+        {/* Minimal Add Indicator */}
+        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

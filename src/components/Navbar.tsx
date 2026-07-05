@@ -1,7 +1,7 @@
 'use client';
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   userEmail?: string;
@@ -11,160 +11,61 @@ interface NavbarProps {
 
 export default function Navbar({ userEmail, onMenuToggle, userName }: NavbarProps) {
   const displayName = userName || userEmail?.split('@')[0] || 'User';
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav style={styles.navbar}>
-      <div style={styles.left}>
-        <div style={styles.logoWrapper}>
-          <Image
-            src="/logo.png"
-            alt="Vijaya Products"
-            width={40}
-            height={40}
-            style={styles.logoImage}
-            priority
-          />
-        </div>
-        <div style={styles.brand}>
-          <span style={styles.brandName}>Vijaya Products</span>
-          <span style={styles.brandTag}>POS System</span>
-        </div>
-      </div>
-
-      <div style={styles.right}>
-        <div style={styles.userInfo}>
-          <div style={styles.avatar}>
-            {displayName.charAt(0).toUpperCase()}
+    <div className="fixed top-0 left-0 w-full z-[150] px-4 sm:px-8 pt-4 sm:pt-6 pointer-events-none transition-all duration-500">
+      <nav className={cn(
+        "mx-auto max-w-[1600px] flex items-center justify-between rounded-full px-4 sm:px-6 py-3 pointer-events-auto transition-all duration-500",
+        scrolled ? "bg-white/70 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/50" : "bg-transparent"
+      )}>
+        
+        {/* Brand */}
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 overflow-hidden rounded-2xl shadow-sm border border-slate-200/50 bg-white">
+            <Image
+              src="/logo.png"
+              alt="Vijaya Products"
+              fill
+              className="object-contain p-1"
+              priority
+            />
           </div>
-          <div style={styles.userText}>
-            <span style={styles.greeting}>Hello, {displayName}</span>
-            {userEmail && (
-              <span style={styles.email}>{userEmail}</span>
-            )}
+          <div className="flex flex-col">
+            <span className="text-base font-extrabold text-slate-800 tracking-tight leading-none mb-0.5">Vijaya Products</span>
+            <span className="text-[10px] font-bold text-rose-500 tracking-widest uppercase">POS System</span>
           </div>
         </div>
 
-        <button
-          onClick={onMenuToggle}
-          style={styles.menuButton}
-          aria-label="Toggle menu"
-          title="Settings"
-        >
-          <span style={styles.hamburger}>☰</span>
-        </button>
-      </div>
-    </nav>
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-3 pr-4 border-r border-slate-200/50">
+            <div className="flex flex-col text-right">
+              <span className="text-xs font-bold text-slate-800 leading-none mb-1">Hello, {displayName}</span>
+              {userEmail && <span className="text-[10px] font-medium text-slate-400">{userEmail}</span>}
+            </div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-200 to-slate-100 border border-slate-200/60 shadow-sm flex items-center justify-center text-slate-600 font-bold text-sm">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          </div>
+
+          <button
+            onClick={onMenuToggle}
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/50 transition-all shadow-sm hover:shadow active:scale-95"
+            aria-label="Settings Menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+          </button>
+        </div>
+      </nav>
+    </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  navbar: {
-    position: 'sticky',
-    top: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '64px',
-    padding: '0 24px',
-    background: '#FFFFFF',
-    borderBottom: '1px solid #E5E7EB',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-    zIndex: 150,
-    flexShrink: 0,
-  },
-  left: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-  },
-  logoWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'transform 0.2s ease',
-    cursor: 'pointer',
-  },
-  logoImage: {
-    width: '40px',
-    height: '40px',
-    objectFit: 'contain',
-    borderRadius: '8px',
-    transition: 'transform 0.2s ease',
-  },
-  brand: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1px',
-  },
-  brandName: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#1F2937',
-    letterSpacing: '-0.01em',
-    lineHeight: 1.2,
-  },
-  brandTag: {
-    fontSize: '11px',
-    fontWeight: 500,
-    color: '#9CA3AF',
-    letterSpacing: '0.03em',
-    textTransform: 'uppercase' as const,
-  },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  avatar: {
-    width: '34px',
-    height: '34px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
-    color: '#FFFFFF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '14px',
-    fontWeight: 700,
-    flexShrink: 0,
-  },
-  userText: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1px',
-  },
-  greeting: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#1F2937',
-    lineHeight: 1.2,
-  },
-  email: {
-    fontSize: '11px',
-    color: '#9CA3AF',
-    lineHeight: 1.2,
-  },
-  menuButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '40px',
-    height: '40px',
-    border: '1px solid #E5E7EB',
-    borderRadius: '10px',
-    background: '#FFFFFF',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    flexShrink: 0,
-  },
-  hamburger: {
-    fontSize: '20px',
-    color: '#6B7280',
-    lineHeight: 1,
-  },
-};
