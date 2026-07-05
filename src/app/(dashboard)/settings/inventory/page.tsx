@@ -38,7 +38,7 @@ export default function InventoryPage() {
 
   const loadProducts = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from('products').select('*').order('name');
+    const { data, error } = await supabase.from('products').select('*').eq('is_active', true).order('name');
     if (error) {
       addToast('Failed to load products', 'error');
     } else if (data) {
@@ -198,7 +198,7 @@ export default function InventoryPage() {
             className="bg-white hover:bg-slate-50 text-slate-700 px-5 py-3 rounded-2xl font-bold shadow-sm border border-slate-200 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm"
           >
             <Upload className="w-4 h-4 text-slate-400" />
-            CSV Import
+            Import / Update CSV
           </button>
           <button 
             onClick={() => handleOpenModal()}
