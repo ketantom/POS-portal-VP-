@@ -52,11 +52,12 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
             )}
             {onClose && (
               <button 
-                onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200/50 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors z-10"
+            >
+              <X className="w-4 h-4 pointer-events-none" />
+            </button>
             )}
           </div>
 
