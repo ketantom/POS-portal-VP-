@@ -52,7 +52,8 @@ export default function AccountManagementPage() {
        if (profile) setCurrentUserRole(profile.role);
     }
 
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    // Only show active users by default
+    const { data, error } = await supabase.from('profiles').select('*').eq('is_active', true).order('created_at', { ascending: false });
     
     if (error) {
       addToast('Failed to load users from database', 'error');

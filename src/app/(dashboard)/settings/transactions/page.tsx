@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/Toast';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Invoice } from '@/lib/types';
+import { Invoice, InvoiceItem } from '@/lib/types';
 import { format } from 'date-fns';
-import { Trash2, Search, Receipt } from 'lucide-react';
+import { Trash2, Search, Receipt as ReceiptIcon, Eye } from 'lucide-react';
+import Receipt from '@/components/Receipt';
 
 export default function TransactionsPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -13,6 +14,11 @@ export default function TransactionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Receipt viewing state
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
+  const [currentInvoiceItems, setCurrentInvoiceItems] = useState<InvoiceItem[]>([]);
   
   const { addToast } = useToast();
   const supabase = createClient();
@@ -54,6 +60,23 @@ export default function TransactionsPage() {
       newSelected.add(id);
     }
     setSelectedInvoices(newSelected);
+  };
+
+  const handleViewInvoice = async (invoice: Invoice) => {
+    try {
+      const { data, error } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', invoice.id);
+        
+      if (error) throw error;
+      
+      setCurrentInvoice(invoice);
+      setCurrentInvoiceItems(data as InvoiceItem[]);
+      setShowReceipt(true);
+    } catch (error) {
+      addToast('Failed to load invoice details', 'error');
+    }
   };
 
   const handleDeleteSelected = async () => {
@@ -149,21 +172,22 @@ export default function TransactionsPage() {
                 <th className="px-6 py-5">Customer</th>
                 <th className="px-6 py-5">Amount</th>
                 <th className="px-6 py-5">Payment</th>
-                <th className="px-6 py-5 rounded-tr-3xl">Status</th>
+                <th className="px-6 py-5">Status</th>
+                <th className="px-6 py-5 rounded-tr-3xl text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-20 text-slate-400 font-medium">
+                  <td colSpan={8} className="text-center py-20 text-slate-400 font-medium">
                     <span className="animate-spin inline-block w-8 h-8 border-4 border-slate-100 border-t-rose-500 rounded-full mb-4"></span>
                     <p className="text-sm">Loading transactions...</p>
                   </td>
                 </tr>
               ) : filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-20 text-slate-400 font-medium">
-                    <Receipt className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                  <td colSpan={8} className="text-center py-20 text-slate-400 font-medium">
+                    <ReceiptIcon className="w-12 h-12 mx-auto text-slate-300 mb-3" />
                     <p className="text-sm">No transactions found.</p>
                   </td>
                 </tr>
@@ -210,6 +234,15 @@ export default function TransactionsPage() {
                         {inv.status}
                       </span>
                     </td>
+                    <td className="px-6 py-5 text-right">
+                      <button 
+                        onClick={() => handleViewInvoice(inv)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -217,6 +250,14 @@ export default function TransactionsPage() {
           </table>
         </div>
       </div>
+
+      {showReceipt && currentInvoice && (
+        <Receipt 
+          invoice={currentInvoice} 
+          items={currentInvoiceItems} 
+          onClose={() => setShowReceipt(false)} 
+        />
+      )}
     </div>
   );
 }

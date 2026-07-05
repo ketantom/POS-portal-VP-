@@ -149,66 +149,66 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
 
       {/* PRINT VIEW (Optimized for 58mm Thermal Printer) */}
       {mounted && createPortal(
-        <div className="print-receipt">
+        <div className="print-receipt" style={{ fontWeight: 800, color: '#000', fontFamily: 'monospace' }}>
           <div style={{ textAlign: 'center', marginBottom: '4mm' }}>
              {/* Using basic img for broad print compatibility */}
             <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', margin: '0 auto 2mm auto', display: 'block' }} />
-            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>VIJAYA PRODUCTS</div>
-            <div style={{ fontSize: '10px' }}>Jambharmala, Salgaon, Tal. Kudal<br/>Dist. Sindhudurg, MH 416519</div>
+            <div style={{ fontWeight: 900, fontSize: '15px' }}>VIJAYA PRODUCTS</div>
+            <div style={{ fontSize: '12px', fontWeight: 700 }}>Jambharmala, Salgaon, Tal. Kudal<br/>Dist. Sindhudurg, MH 416519</div>
           </div>
           
-          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          <div style={{ borderTop: '2px dashed #000', margin: '2mm 0' }}></div>
           
-          <div style={{ marginBottom: '2mm', fontSize: '11px' }}>
+          <div style={{ marginBottom: '2mm', fontSize: '12px', fontWeight: 800 }}>
             <div>Inv: {invoice.invoice_number}</div>
             <div>Date: {formatDateTime(invoice.created_at)}</div>
             {invoice.customer_name && <div>Cust: {invoice.customer_name}</div>}
           </div>
           
-          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          <div style={{ borderTop: '2px dashed #000', margin: '2mm 0' }}></div>
           
           <div style={{ width: '100%', marginBottom: '2mm' }}>
-            <table style={{ width: '100%', fontSize: '11px' }}>
+            <table style={{ width: '100%', fontSize: '12px', fontWeight: 800 }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left' }}>Item</th>
-                  <th style={{ textAlign: 'center' }}>Qty</th>
-                  <th style={{ textAlign: 'right' }}>Amt</th>
+                  <th style={{ textAlign: 'left', fontWeight: 900 }}>Item</th>
+                  <th style={{ textAlign: 'center', fontWeight: 900 }}>Qty</th>
+                  <th style={{ textAlign: 'right', fontWeight: 900 }}>Amt</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map(item => (
                   <tr key={item.id}>
-                    <td style={{ padding: '1mm 0' }}>{item.product_name}</td>
-                    <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                    <td style={{ textAlign: 'right' }}>{item.total_price.toFixed(2)}</td>
+                    <td style={{ padding: '1mm 0', fontWeight: 800 }}>{item.product_name}</td>
+                    <td style={{ textAlign: 'center', fontWeight: 800 }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 800 }}>{item.total_price.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          <div style={{ borderTop: '2px dashed #000', margin: '2mm 0' }}></div>
           
-          <div style={{ textAlign: 'right', fontSize: '11px' }}>
+          <div style={{ textAlign: 'right', fontSize: '12px', fontWeight: 800 }}>
             <div>Sub: {invoice.subtotal.toFixed(2)}</div>
             {invoice.discount_enabled && <div>Disc: -{invoice.discount_amount.toFixed(2)}</div>}
             {invoice.gst_enabled && <div>GST({invoice.gst_rate}%): {invoice.gst_amount.toFixed(2)}</div>}
           </div>
           
-          <div style={{ fontSize: '14px', fontWeight: 'bold', textAlign: 'right', margin: '2mm 0' }}>
+          <div style={{ fontSize: '16px', fontWeight: 900, textAlign: 'right', margin: '2mm 0' }}>
             TOTAL: {invoice.total_amount.toFixed(2)}
           </div>
           
-          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          <div style={{ borderTop: '2px dashed #000', margin: '2mm 0' }}></div>
           
-          <div style={{ textAlign: 'center', margin: '2mm 0', fontSize: '11px' }}>
+          <div style={{ textAlign: 'center', margin: '2mm 0', fontSize: '12px', fontWeight: 800 }}>
             Pay Mode: {invoice.payment_method}
           </div>
           
-          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          <div style={{ borderTop: '2px dashed #000', margin: '2mm 0' }}></div>
           
-          <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '4mm' }}>
+          <div style={{ textAlign: 'center', fontSize: '11px', fontWeight: 800, marginTop: '4mm' }}>
             <div>Thank you for your purchase!</div>
             <div>*** Visit again! ***</div>
           </div>

@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function PaymentMethodsPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [newMethod, setNewMethod] = useState('');
+  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { addToast } = useToast();
   const supabase = createClient();
@@ -25,16 +26,49 @@ export default function PaymentMethodsPage() {
     setIsLoading(false);
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMethod.trim()) return;
 
-    const { error } = await supabase.from('payment_methods').insert([{ name: newMethod.trim(), is_active: true }]);
+    if (editingMethod) {
+      const { error } = await supabase.from('payment_methods').update({ name: newMethod.trim() }).eq('id', editingMethod.id);
+      if (error) {
+        addToast(error.message, 'error');
+      } else {
+        addToast('Payment method updated', 'success');
+        setNewMethod('');
+        setEditingMethod(null);
+        loadMethods();
+      }
+    } else {
+      const { error } = await supabase.from('payment_methods').insert([{ name: newMethod.trim(), is_active: true }]);
+      if (error) {
+        addToast(error.message, 'error');
+      } else {
+        addToast('Payment method added', 'success');
+        setNewMethod('');
+        loadMethods();
+      }
+    }
+  };
+
+  const handleEdit = (method: PaymentMethod) => {
+    setEditingMethod(method);
+    setNewMethod(method.name);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMethod(null);
+    setNewMethod('');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this payment method?')) return;
+    const { error } = await supabase.from('payment_methods').delete().eq('id', id);
     if (error) {
       addToast(error.message, 'error');
     } else {
-      addToast('Payment method added', 'success');
-      setNewMethod('');
+      addToast('Payment method deleted', 'success');
       loadMethods();
     }
   };
@@ -60,7 +94,7 @@ export default function PaymentMethodsPage() {
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 sm:p-8 mb-8">
-        <form onSubmit={handleAdd} className="flex gap-4">
+        <form onSubmit={handleSave} className="flex gap-4">
           <div className="relative flex-1">
             <span className="absolute left-4 top-3.5 text-slate-400">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
@@ -74,8 +108,13 @@ export default function PaymentMethodsPage() {
               required
             />
           </div>
+          {editingMethod && (
+            <button type="button" onClick={handleCancelEdit} className="text-slate-500 hover:text-slate-700 px-4 py-3 text-sm font-bold transition-all">
+              Cancel
+            </button>
+          )}
           <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            Add Option
+            {editingMethod ? 'Update' : 'Add Option'}
           </button>
         </form>
       </div>
@@ -112,7 +151,7 @@ export default function PaymentMethodsPage() {
                       {method.name}
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-right">
+                  <td className="px-6 py-5 text-right flex items-center justify-end gap-3">
                     <button 
                       onClick={() => toggleStatus(method.id, method.is_active)}
                       className={cn(
@@ -124,6 +163,12 @@ export default function PaymentMethodsPage() {
                     >
                       <span className={cn("w-2 h-2 rounded-full", method.is_active ? "bg-emerald-500" : "bg-slate-400")} />
                       {method.is_active ? 'Active' : 'Disabled'}
+                    </button>
+                    <button onClick={() => handleEdit(method)} className="p-2 text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 rounded-xl transition-colors">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </button>
+                    <button onClick={() => handleDelete(method.id)} className="p-2 text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-xl transition-colors">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </td>
                 </tr>

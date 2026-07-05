@@ -108,15 +108,16 @@ export default function InventoryPage() {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete this product?')) return;
     
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
+      // Soft-delete to prevent breaking historical invoices that reference this product
+      const { error } = await supabase.from('products').update({ is_active: false }).eq('id', id);
       if (error) throw error;
-      addToast('Product deleted successfully', 'success');
+      addToast('Product removed successfully', 'success');
       loadProducts();
     } catch (error: any) {
-      addToast(error.message || 'Failed to delete product', 'error');
+      addToast(error.message || 'Failed to remove product', 'error');
     }
   };
 
