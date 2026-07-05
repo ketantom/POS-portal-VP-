@@ -61,14 +61,20 @@ export default function ReportsPage() {
           payment_method, 
           created_at, 
           created_by,
-          status,
-          profiles!created_by(full_name, email)
+          status
         `)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .eq('status', 'completed');
 
       if (error) throw error;
+
+      // Fetch Profiles separately to avoid foreign key relation errors
+      const { data: profiles } = await supabase.from('profiles').select('id, full_name, email');
+      const profileMap: Record<string, any> = {};
+      profiles?.forEach(p => {
+        profileMap[p.id] = p;
+      });
 
       // Process Data
       let rev = 0;
@@ -94,7 +100,7 @@ export default function ReportsPage() {
         payMap[payKey].count++;
 
         // Account
-        const profile = Array.isArray(inv.profiles) ? inv.profiles[0] : inv.profiles;
+        const profile = profileMap[inv.created_by];
         const accKey = profile?.full_name || profile?.email || 'Unknown User';
         if (!accMap[accKey]) accMap[accKey] = { accountName: accKey, total: 0, count: 0 };
         accMap[accKey].total += inv.total_amount;

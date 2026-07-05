@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm animate-fade-in transition-opacity"
+          className="fixed inset-0 z-[190] bg-slate-900/40 backdrop-blur-sm animate-fade-in transition-opacity"
           onClick={onClose}
         />
       )}
@@ -36,7 +36,7 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
       {/* Sidebar Panel */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-50 h-full w-[340px] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col',
+          'fixed top-0 right-0 z-[200] h-full w-[340px] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >

@@ -194,7 +194,7 @@ export default function POSDashboard() {
   };
 
   return (
-    <div className="flex-1 px-4 sm:px-8 pb-8 pt-[100px] flex flex-col md:flex-row gap-8 h-screen overflow-hidden">
+    <div className="flex-1 px-4 sm:px-8 pb-8 flex flex-col md:flex-row gap-8 h-full overflow-hidden">
       
       {/* Left Panel - Products */}
       <div className="w-full md:w-[65%] flex flex-col h-full overflow-hidden">

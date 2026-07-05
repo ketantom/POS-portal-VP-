@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         userRole={userProfile?.role}
       />
       
-      <main className="flex-1 w-full max-w-[1600px] mx-auto overflow-hidden flex flex-col">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto overflow-hidden flex flex-col pt-[100px]">
         {children}
       </main>
     </div>
