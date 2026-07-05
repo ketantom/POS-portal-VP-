@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { Invoice, InvoiceItem } from '@/lib/types';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
@@ -17,8 +18,11 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
     window.print();
   };
 
+  const [mounted, setMounted] = useState(false);
+
   // Prevent background scrolling when modal is open
   useEffect(() => {
+    setMounted(true);
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = 'auto';
@@ -57,7 +61,7 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
           </div>
 
           {/* Receipt Content */}
-          <div className="p-8 overflow-y-auto custom-scrollbar flex-1 relative">
+          <div className="p-8 overflow-y-auto custom-scrollbar flex-1 min-h-0 relative">
             <div className="text-center mb-6 relative">
               <div className="w-16 h-16 mx-auto mb-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-2">
                 <Image src="/logo.png" alt="Vijaya Products Logo" width={50} height={50} className="object-contain" priority />
@@ -143,71 +147,73 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
       </div>
 
       {/* PRINT VIEW (Optimized for 58mm Thermal Printer) */}
-      {/* This only shows up when window.print() is called thanks to globals.css */}
-      <div className="print-receipt">
-        <div style={{ textAlign: 'center', marginBottom: '4mm' }}>
-           {/* Using basic img for broad print compatibility */}
-          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', margin: '0 auto 2mm auto', display: 'block' }} />
-          <div style={{ fontWeight: 'bold', fontSize: '14px' }}>VIJAYA PRODUCTS</div>
-          <div style={{ fontSize: '10px' }}>Jambharmala, Salgaon, Tal. Kudal<br/>Dist. Sindhudurg, MH 416519</div>
-        </div>
-        
-        <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
-        
-        <div style={{ marginBottom: '2mm', fontSize: '11px' }}>
-          <div>Inv: {invoice.invoice_number}</div>
-          <div>Date: {formatDateTime(invoice.created_at)}</div>
-          {invoice.customer_name && <div>Cust: {invoice.customer_name}</div>}
-        </div>
-        
-        <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
-        
-        <div style={{ width: '100%', marginBottom: '2mm' }}>
-          <table style={{ width: '100%', fontSize: '11px' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left' }}>Item</th>
-                <th style={{ textAlign: 'center' }}>Qty</th>
-                <th style={{ textAlign: 'right' }}>Amt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr key={item.id}>
-                  <td style={{ padding: '1mm 0' }}>{item.product_name}</td>
-                  <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                  <td style={{ textAlign: 'right' }}>{item.total_price.toFixed(2)}</td>
+      {mounted && createPortal(
+        <div className="print-receipt">
+          <div style={{ textAlign: 'center', marginBottom: '4mm' }}>
+             {/* Using basic img for broad print compatibility */}
+            <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', margin: '0 auto 2mm auto', display: 'block' }} />
+            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>VIJAYA PRODUCTS</div>
+            <div style={{ fontSize: '10px' }}>Jambharmala, Salgaon, Tal. Kudal<br/>Dist. Sindhudurg, MH 416519</div>
+          </div>
+          
+          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          
+          <div style={{ marginBottom: '2mm', fontSize: '11px' }}>
+            <div>Inv: {invoice.invoice_number}</div>
+            <div>Date: {formatDateTime(invoice.created_at)}</div>
+            {invoice.customer_name && <div>Cust: {invoice.customer_name}</div>}
+          </div>
+          
+          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          
+          <div style={{ width: '100%', marginBottom: '2mm' }}>
+            <table style={{ width: '100%', fontSize: '11px' }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left' }}>Item</th>
+                  <th style={{ textAlign: 'center' }}>Qty</th>
+                  <th style={{ textAlign: 'right' }}>Amt</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
-        
-        <div style={{ textAlign: 'right', fontSize: '11px' }}>
-          <div>Sub: {invoice.subtotal.toFixed(2)}</div>
-          {invoice.discount_enabled && <div>Disc: -{invoice.discount_amount.toFixed(2)}</div>}
-          {invoice.gst_enabled && <div>GST({invoice.gst_rate}%): {invoice.gst_amount.toFixed(2)}</div>}
-        </div>
-        
-        <div style={{ fontSize: '14px', fontWeight: 'bold', textAlign: 'right', margin: '2mm 0' }}>
-          TOTAL: {invoice.total_amount.toFixed(2)}
-        </div>
-        
-        <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
-        
-        <div style={{ textAlign: 'center', margin: '2mm 0', fontSize: '11px' }}>
-          Pay Mode: {invoice.payment_method}
-        </div>
-        
-        <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
-        
-        <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '4mm' }}>
-          <div>Thank you for your purchase!</div>
-          <div>*** Visit again! ***</div>
-        </div>
-      </div>
+              </thead>
+              <tbody>
+                {items.map(item => (
+                  <tr key={item.id}>
+                    <td style={{ padding: '1mm 0' }}>{item.product_name}</td>
+                    <td style={{ textAlign: 'center' }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'right' }}>{item.total_price.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          
+          <div style={{ textAlign: 'right', fontSize: '11px' }}>
+            <div>Sub: {invoice.subtotal.toFixed(2)}</div>
+            {invoice.discount_enabled && <div>Disc: -{invoice.discount_amount.toFixed(2)}</div>}
+            {invoice.gst_enabled && <div>GST({invoice.gst_rate}%): {invoice.gst_amount.toFixed(2)}</div>}
+          </div>
+          
+          <div style={{ fontSize: '14px', fontWeight: 'bold', textAlign: 'right', margin: '2mm 0' }}>
+            TOTAL: {invoice.total_amount.toFixed(2)}
+          </div>
+          
+          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          
+          <div style={{ textAlign: 'center', margin: '2mm 0', fontSize: '11px' }}>
+            Pay Mode: {invoice.payment_method}
+          </div>
+          
+          <div style={{ borderTop: '1px dashed #000', margin: '2mm 0' }}></div>
+          
+          <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '4mm' }}>
+            <div>Thank you for your purchase!</div>
+            <div>*** Visit again! ***</div>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }

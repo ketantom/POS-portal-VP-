@@ -18,9 +18,11 @@ export default function RootLayout({
         <link rel="icon" href="/logo.png" />
       </head>
       <body>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <div id="app-root">
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </div>
       </body>
     </html>
   );

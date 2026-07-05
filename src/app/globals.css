@@ -32,6 +32,7 @@
 /* Print Styles */
 @media print {
   @page {
+    size: 58mm auto;
     margin: 0;
   }
   
@@ -41,12 +42,12 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
-    background: transparent !important;
+    background: #fff !important;
   }
   
-  /* Hide EVERYTHING by default */
-  body * {
-    visibility: hidden;
+  /* Hide the main app completely so it takes zero space */
+  #app-root, .toast-container, .hide-on-print {
+    display: none !important;
   }
   
   /* Hide Next.js dev overlays if present */
@@ -54,16 +55,8 @@
     display: none !important;
   }
 
-  /* Only show the print-receipt container */
-  .print-receipt,
-  .print-receipt * {
-    visibility: visible !important;
-  }
-  
   .print-receipt {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block !important;
     width: 58mm; /* Standard thermal printer width */
     padding: 0;
     margin: 0;
@@ -72,9 +65,5 @@
     font-family: 'Courier New', Courier, monospace;
     color: #000 !important;
     background: #fff !important;
-  }
-  
-  .hide-on-print {
-    display: none !important;
   }
 }

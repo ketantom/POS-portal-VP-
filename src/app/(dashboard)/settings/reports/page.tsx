@@ -57,6 +57,7 @@ export default function ReportsPage() {
       // Fetch Invoices within date range
       const { data: invoices, error } = await supabase
         .from('invoices')
+        .select(`
           id,
           invoice_number,
           total_amount, 
@@ -64,6 +65,7 @@ export default function ReportsPage() {
           created_at, 
           created_by,
           status
+        `)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .eq('status', 'completed');
