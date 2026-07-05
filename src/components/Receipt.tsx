@@ -64,10 +64,10 @@ export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptPr
           {/* Receipt Content */}
           <div className="p-8 overflow-y-auto custom-scrollbar flex-1 min-h-0 relative">
             <div className="text-center mb-6 relative">
-              <div className="w-16 h-16 mx-auto mb-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-2">
-                <Image src="/logo.png" alt="Vijaya Products Logo" width={50} height={50} className="object-contain" priority />
+              <div className="w-20 h-20 mx-auto mb-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-2">
+                <Image src="/logo.png" alt="Vijaya Products Logo" width={65} height={65} className="object-contain" priority />
               </div>
-              <h2 className="font-extrabold text-xl text-slate-900 tracking-tight">Vijaya Products</h2>
+              <h2 className="font-extrabold text-2xl text-slate-900 tracking-tight">Vijaya Products</h2>
               <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-medium">Jambharmala, Salgaon, Kudal</p>
             </div>
             

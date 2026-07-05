@@ -52,12 +52,12 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md bg-white/80 backdrop-blur-2xl shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white p-8 sm:p-10 rounded-[32px] relative z-10 animate-fade-in-up">
         <div className="text-center mb-10">
-          <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center p-3 animate-scale-in">
+          <div className="w-32 h-32 mx-auto mb-6 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-center p-4 animate-scale-in">
             <Image 
               src="/logo.png" 
               alt="Vijaya Products Logo" 
-              width={80} 
-              height={80} 
+              width={100} 
+              height={100} 
               className="object-contain drop-shadow-sm"
               priority
             />

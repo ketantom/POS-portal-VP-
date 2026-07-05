@@ -29,8 +29,8 @@ export default function Navbar({ userEmail, onMenuToggle, userName }: NavbarProp
       )}>
         
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 overflow-hidden rounded-2xl shadow-sm border border-slate-200/50 bg-white">
+        <div className="flex items-center gap-4">
+          <div className="relative w-14 h-14 overflow-hidden rounded-2xl shadow-sm border border-slate-200/50 bg-white">
             <Image
               src="/logo.png"
               alt="Vijaya Products"
@@ -40,8 +40,8 @@ export default function Navbar({ userEmail, onMenuToggle, userName }: NavbarProp
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-extrabold text-slate-800 tracking-tight leading-none mb-0.5">Vijaya Products</span>
-            <span className="text-[10px] font-bold text-rose-500 tracking-widest uppercase">POS System</span>
+            <span className="text-xl font-extrabold text-slate-800 tracking-tight leading-none mb-0.5">Vijaya Products</span>
+            <span className="text-xs font-bold text-rose-500 tracking-widest uppercase">POS System</span>
           </div>
         </div>
 

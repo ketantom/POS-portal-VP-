@@ -60,7 +60,7 @@ export default function CartPanel({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-white/70 backdrop-blur-2xl rounded-[32px] border border-white shadow-[0_8px_40px_rgb(0,0,0,0.04)] overflow-hidden relative">
+    <div className="flex flex-col h-[calc(100vh-80px)] bg-white/70 backdrop-blur-2xl rounded-[32px] border border-white shadow-[0_8px_40px_rgb(0,0,0,0.04)] overflow-hidden relative">
       {/* Frosted noise texture */}
       <div className="absolute inset-0 bg-noise opacity-[0.015] pointer-events-none mix-blend-multiply" />
       
@@ -85,7 +85,7 @@ export default function CartPanel({
             <p className="font-medium text-sm">Cart is empty</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2.5">
             {items.map((item) => (
               <div key={item.product.id} className="flex justify-between items-start group">
                 <div className="flex-1 pr-3">
@@ -117,7 +117,7 @@ export default function CartPanel({
       </div>
 
       {/* Checkout Area - The Receipt Base */}
-      <div className="p-4 sm:p-5 bg-slate-50/80 backdrop-blur-md flex flex-col gap-3 relative z-10 border-t border-slate-200/50">
+      <div className="p-3 sm:p-4 bg-slate-50/80 backdrop-blur-md flex flex-col gap-2.5 relative z-10 border-t border-slate-200/50">
         
         {/* Customer Info (Sleek inputs) */}
         <div className="flex gap-2">
