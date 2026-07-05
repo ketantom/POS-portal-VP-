@@ -6,13 +6,12 @@ import { useToast } from '@/components/Toast';
 import ProductCard from '@/components/ProductCard';
 import CartPanel, { InvoiceData } from '@/components/CartPanel';
 import Receipt from '@/components/Receipt';
-import InvoiceHistory from '@/components/InvoiceHistory';
 
 export default function POSDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
   
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,15 +28,13 @@ export default function POSDashboard() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [productsRes, pmRes, invRes] = await Promise.all([
+      const [productsRes, pmRes] = await Promise.all([
         supabase.from('products').select('*').eq('is_active', true).order('name'),
-        supabase.from('payment_methods').select('*').eq('is_active', true).order('name'),
-        supabase.from('invoices').select('*').order('created_at', { ascending: false }).limit(10)
+        supabase.from('payment_methods').select('*').eq('is_active', true).order('name')
       ]);
 
       if (productsRes.data) setProducts(productsRes.data as Product[]);
       if (pmRes.data) setPaymentMethods(pmRes.data as PaymentMethod[]);
-      if (invRes.data) setRecentInvoices(invRes.data as Invoice[]);
     } catch (error) {
       console.error('Failed to load POS data', error);
       addToast('Failed to load POS data', 'error');
@@ -50,14 +47,25 @@ export default function POSDashboard() {
     loadData();
   }, []);
 
+  const categories = useMemo(() => {
+    const cats = new Set(products.map(p => p.category || 'Uncategorized'));
+    return ['All', ...Array.from(cats)].sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
-    if (!searchQuery) return products;
-    const lowerQ = searchQuery.toLowerCase();
-    return products.filter(p => 
-      p.name.toLowerCase().includes(lowerQ) || 
-      p.sku_code.toLowerCase().includes(lowerQ)
-    );
-  }, [products, searchQuery]);
+    let filtered = products;
+    if (activeCategory !== 'All') {
+      filtered = filtered.filter(p => (p.category || 'Uncategorized') === activeCategory);
+    }
+    if (searchQuery) {
+      const lowerQ = searchQuery.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(lowerQ) || 
+        p.sku_code.toLowerCase().includes(lowerQ)
+      );
+    }
+    return filtered;
+  }, [products, searchQuery, activeCategory]);
 
   const handleAddToCart = (product: Product) => {
     setCart(prev => {
@@ -205,7 +213,7 @@ export default function POSDashboard() {
       
       {/* Left Panel - Products */}
       <div className="w-full md:w-[65%] flex flex-col h-full overflow-hidden">
-        <div className="mb-6 relative z-20 flex items-center justify-between">
+        <div className="mb-6 relative z-20 flex flex-col gap-4">
           <div className="relative w-full max-w-md group">
             <span className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-slate-900 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -225,6 +233,18 @@ export default function POSDashboard() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             )}
+          </div>
+          
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${activeCategory === cat ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-800 border border-slate-200/60'}`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -252,15 +272,6 @@ export default function POSDashboard() {
             </div>
           )}
 
-          {/* Invoice History Section */}
-          <div className="mt-8 pt-8 border-t border-slate-200/50">
-            <InvoiceHistory 
-              invoices={recentInvoices} 
-              onViewInvoice={handleViewInvoice}
-              isLoading={isLoading}
-              onRefresh={loadData}
-            />
-          </div>
         </div>
       </div>
 

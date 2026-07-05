@@ -19,6 +19,8 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
     { label: 'Payment Methods', icon: '💳', path: '/settings/payments', roles: ['super_admin', 'manager'] },
     { label: 'Banking Details', icon: '🏦', path: '/settings/banking', roles: ['super_admin'] },
     { label: 'Account Management', icon: '👥', path: '/settings/accounts', roles: ['super_admin', 'manager'] },
+    { label: 'Recent Transactions', icon: '🧾', path: '/settings/transactions', roles: ['super_admin', 'manager', 'cashier'] },
+    { label: 'Sales Reports & Analytics', icon: '📊', path: '/settings/reports', roles: ['super_admin', 'manager'] },
   ];
 
   const visibleMenuItems = menuItems.filter((item) => userRole && item.roles.includes(userRole));

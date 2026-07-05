@@ -23,7 +23,8 @@ export default function InventoryPage() {
     description: '',
     sku_code: '',
     price: '',
-    unit: 'bottle',
+    unit: 'piece',
+    category: 'Uncategorized',
     is_active: true
   });
 
@@ -55,6 +56,7 @@ export default function InventoryPage() {
         sku_code: product.sku_code,
         price: product.price.toString(),
         unit: product.unit,
+        category: product.category || 'Uncategorized',
         is_active: product.is_active
       });
     } else {
@@ -65,6 +67,7 @@ export default function InventoryPage() {
         sku_code: `SKU-${Math.floor(Math.random() * 10000)}`,
         price: '',
         unit: 'bottle',
+        category: 'Uncategorized',
         is_active: true
       });
     }
@@ -81,6 +84,7 @@ export default function InventoryPage() {
         sku_code: formData.sku_code,
         price: parseFloat(formData.price),
         unit: formData.unit,
+        category: formData.category || 'Uncategorized',
         is_active: formData.is_active
       };
 
@@ -131,6 +135,7 @@ export default function InventoryPage() {
             sku_code: row.sku_code,
             price: parseFloat(row.price),
             unit: row.unit || 'bottle',
+            category: row.category || 'Uncategorized',
             is_active: row.is_active !== 'FALSE' && row.is_active !== 'false'
           })).filter(p => p.name && p.sku_code && !isNaN(p.price));
 
@@ -157,7 +162,7 @@ export default function InventoryPage() {
   };
 
   const downloadCsvTemplate = () => {
-    const csvContent = "name,sku_code,price,unit,is_active\nExample Juice,SKU-001,150,bottle,TRUE\n";
+    const csvContent = "name,sku_code,price,unit,category,is_active\nExample Juice,SKU-001,150,bottle,Beverages,TRUE\n";
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -210,6 +215,7 @@ export default function InventoryPage() {
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] uppercase tracking-wider font-bold text-slate-400">
                 <th className="px-6 py-5 rounded-tl-3xl">Product</th>
+                <th className="px-6 py-5">Category</th>
                 <th className="px-6 py-5">SKU Code</th>
                 <th className="px-6 py-5">Price</th>
                 <th className="px-6 py-5">Status</th>
@@ -237,6 +243,9 @@ export default function InventoryPage() {
                     <td className="px-6 py-5">
                       <div className="font-bold text-slate-800 text-sm">{product.name}</div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider">Per {product.unit}</div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="font-medium text-sm text-slate-600">{product.category || 'Uncategorized'}</span>
                     </td>
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60">{product.sku_code}</span>
@@ -299,6 +308,10 @@ export default function InventoryPage() {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">SKU Code</label>
                     <input required type="text" value={formData.sku_code} onChange={e => setFormData({...formData, sku_code: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-400 focus:bg-white transition-all font-medium text-slate-800 shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
+                    <input required type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-400 focus:bg-white transition-all font-medium text-slate-800 shadow-sm" placeholder="e.g. Beverages" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Price (₹)</label>

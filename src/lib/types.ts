@@ -17,6 +17,7 @@ export interface Product {
   sku_code: string;
   price: number;
   unit: 'bottle' | 'ml' | 'L' | 'pack' | 'box' | 'piece';
+  category: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;

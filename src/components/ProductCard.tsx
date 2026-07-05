@@ -18,7 +18,7 @@ export default function ProductCard({ product, onAdd }: ProductCardProps) {
   ];
   const colorIndex = product.name.length % colors.length;
   const gradientClass = colors[colorIndex];
-  const initial = product.name.charAt(0).toUpperCase();
+  const initial = product.name.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <button

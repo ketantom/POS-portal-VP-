@@ -28,7 +28,8 @@ interface AccountSummary {
 
 export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('7days'); // 'today', '7days', '30days'
+  const [startDate, setStartDate] = useState(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   
   const [dailySales, setDailySales] = useState<DailySummary[]>([]);
   const [paymentStats, setPaymentStats] = useState<PaymentSummary[]>([]);
@@ -42,17 +43,14 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadReports();
-  }, [dateRange]);
+  }, [startDate, endDate]);
 
   const loadReports = async () => {
     setIsLoading(true);
     
     try {
-      let startDate = startOfDay(new Date());
-      const endDate = endOfDay(new Date());
-
-      if (dateRange === '7days') startDate = startOfDay(subDays(new Date(), 7));
-      if (dateRange === '30days') startDate = startOfDay(subDays(new Date(), 30));
+      const start = startOfDay(new Date(startDate));
+      const end = endOfDay(new Date(endDate));
 
       // Fetch Invoices within date range
       const { data: invoices, error } = await supabase
@@ -66,8 +64,8 @@ export default function ReportsPage() {
           created_by,
           status
         `)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString())
+        .gte('created_at', start.toISOString())
+        .lte('created_at', end.toISOString())
         .eq('status', 'completed');
 
       if (error) throw error;
@@ -173,7 +171,7 @@ export default function ReportsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `sales_report_${dateRange}.csv`);
+    link.setAttribute("download", `sales_report_${startDate}_to_${endDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -193,15 +191,27 @@ export default function ReportsPage() {
           <p className="text-slate-500 mt-2 font-medium text-sm">Analyze day-to-day sales performance and revenue breakdown.</p>
         </div>
         <div className="flex items-center gap-3">
-          <select 
-            className="bg-white border border-slate-200/60 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none shadow-sm cursor-pointer appearance-none"
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-          >
-            <option value="today">Today</option>
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
-          </select>
+          <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200/60">
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">From</span>
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-400 transition-colors"
+              />
+            </div>
+            <div className="w-px h-8 bg-slate-200 mx-1"></div>
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">To</span>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-rose-400 transition-colors"
+              />
+            </div>
+          </div>
           <button 
             onClick={exportReport}
             className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-bold shadow-[0_4px_14px_rgb(0,0,0,0.2)] hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm disabled:opacity-50"
