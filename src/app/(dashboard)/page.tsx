@@ -63,10 +63,6 @@ export default function POSDashboard() {
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
-        if (existing.quantity >= product.stock_quantity) {
-          addToast(`Maximum stock reached for ${product.name}`, 'warning');
-          return prev;
-        }
         return prev.map(item => 
           item.product.id === product.id 
             ? { ...item, quantity: item.quantity + 1 }
@@ -152,12 +148,7 @@ export default function POSDashboard() {
       if (itemsError) throw itemsError;
 
       // 4. Update Stock Quantities (Simplified client-side loop for now)
-      for (const item of cart) {
-        await supabase
-          .from('products')
-          .update({ stock_quantity: item.product.stock_quantity - item.quantity })
-          .eq('id', item.product.id);
-      }
+      // Removed stock decrement as requested
 
       addToast('Invoice generated successfully!', 'success');
       

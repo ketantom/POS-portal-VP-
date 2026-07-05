@@ -24,7 +24,6 @@ export default function InventoryPage() {
     sku_code: '',
     price: '',
     unit: 'bottle',
-    stock_quantity: '0',
     is_active: true
   });
 
@@ -56,7 +55,6 @@ export default function InventoryPage() {
         sku_code: product.sku_code,
         price: product.price.toString(),
         unit: product.unit,
-        stock_quantity: product.stock_quantity.toString(),
         is_active: product.is_active
       });
     } else {
@@ -67,7 +65,6 @@ export default function InventoryPage() {
         sku_code: `SKU-${Math.floor(Math.random() * 10000)}`,
         price: '',
         unit: 'bottle',
-        stock_quantity: '0',
         is_active: true
       });
     }
@@ -84,7 +81,6 @@ export default function InventoryPage() {
         sku_code: formData.sku_code,
         price: parseFloat(formData.price),
         unit: formData.unit,
-        stock_quantity: parseInt(formData.stock_quantity),
         is_active: formData.is_active
       };
 
@@ -135,7 +131,6 @@ export default function InventoryPage() {
             sku_code: row.sku_code,
             price: parseFloat(row.price),
             unit: row.unit || 'bottle',
-            stock_quantity: parseInt(row.stock_quantity) || 0,
             is_active: row.is_active !== 'FALSE' && row.is_active !== 'false'
           })).filter(p => p.name && p.sku_code && !isNaN(p.price));
 
@@ -162,7 +157,7 @@ export default function InventoryPage() {
   };
 
   const downloadCsvTemplate = () => {
-    const csvContent = "name,sku_code,price,unit,stock_quantity,is_active\nExample Juice,SKU-001,150,bottle,100,TRUE\n";
+    const csvContent = "name,sku_code,price,unit,is_active\nExample Juice,SKU-001,150,bottle,TRUE\n";
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -217,7 +212,6 @@ export default function InventoryPage() {
                 <th className="px-6 py-5 rounded-tl-3xl">Product</th>
                 <th className="px-6 py-5">SKU Code</th>
                 <th className="px-6 py-5">Price</th>
-                <th className="px-6 py-5">Stock</th>
                 <th className="px-6 py-5">Status</th>
                 <th className="px-6 py-5 text-right rounded-tr-3xl">Actions</th>
               </tr>
@@ -249,9 +243,6 @@ export default function InventoryPage() {
                     </td>
                     <td className="px-6 py-5 font-extrabold text-slate-800 text-sm">
                       {formatCurrency(product.price)}
-                    </td>
-                    <td className="px-6 py-5 text-sm font-bold text-slate-600">
-                      {product.stock_quantity}
                     </td>
                     <td className="px-6 py-5">
                       <span className={cn(
@@ -320,10 +311,6 @@ export default function InventoryPage() {
                       <option value="box">Box</option>
                       <option value="piece">Piece</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Stock Qty</label>
-                    <input required type="number" value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-400 focus:bg-white transition-all font-medium text-slate-800 shadow-sm" />
                   </div>
                 </div>
                 
