@@ -240,7 +240,7 @@ export default function InventoryPage() {
                 </tr>
               ) : (
                 products.map((product) => (
-                  <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group" style={{ contentVisibility: 'auto', containIntrinsicSize: '0 65px' } as React.CSSProperties}>
                     <td className="px-6 py-5">
                       <div className="font-bold text-slate-800 text-sm">{product.name}</div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider">Per {product.unit}</div>

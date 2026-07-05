@@ -24,6 +24,7 @@ export default function ProductCard({ product, onAdd }: ProductCardProps) {
     <button
       onClick={() => onAdd(product)}
       className="group w-full text-left bg-white rounded-3xl p-4 border border-slate-200/60 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-slate-300/60 transition-all duration-300 ease-out active:scale-[0.97] flex flex-col gap-3 relative overflow-hidden"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '0 160px' } as React.CSSProperties}
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-50 to-transparent opacity-50 rounded-bl-full pointer-events-none transition-transform duration-500 group-hover:scale-110" />
 
