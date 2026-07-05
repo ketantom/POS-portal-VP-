@@ -67,11 +67,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="toast-container" role="region" aria-label="Notifications" aria-live="polite">
+      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none" role="region" aria-label="Notifications" aria-live="polite">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`toast toast-${toast.type}`}
+            className={`toast toast-${toast.type} pointer-events-auto flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 min-w-[300px]`}
             role="alert"
             style={{
               animation: toast.exiting
@@ -81,14 +81,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           >
             <span
               style={{
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 color: iconColors[toast.type],
-                fontWeight: 700,
+                fontWeight: 900,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '24px',
-                height: '24px',
+                width: '28px',
+                height: '28px',
                 borderRadius: '50%',
                 backgroundColor: toast.type === 'success' ? '#DCFCE7'
                   : toast.type === 'error' ? '#FEE2E2'
@@ -99,9 +99,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             >
               {icons[toast.type]}
             </span>
-            <span className="toast-message">{toast.message}</span>
+            <span className="font-bold text-sm text-slate-700 flex-1">{toast.message}</span>
             <button
-              className="toast-close"
+              className="text-slate-400 hover:text-slate-600 font-bold text-lg leading-none p-1 rounded-full hover:bg-slate-100 transition-colors"
               onClick={() => removeToast(toast.id)}
               aria-label="Close notification"
             >

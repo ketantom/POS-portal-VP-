@@ -117,7 +117,7 @@ export default function CartPanel({
       </div>
 
       {/* Checkout Area - The Receipt Base */}
-      <div className="p-6 bg-slate-50/80 backdrop-blur-md flex flex-col gap-5 relative z-10 border-t border-slate-200/50">
+      <div className="p-4 sm:p-5 bg-slate-50/80 backdrop-blur-md flex flex-col gap-3 relative z-10 border-t border-slate-200/50">
         
         {/* Customer Info (Sleek inputs) */}
         <div className="flex gap-2">
@@ -165,7 +165,7 @@ export default function CartPanel({
           </div>
 
           {/* GST Toggle */}
-          <div className="flex items-center justify-between pb-3 border-b border-dashed border-slate-300">
+          <div className="flex items-center justify-between pb-2 border-b border-dashed border-slate-300">
             <label className="flex items-center gap-2 cursor-pointer group">
               <div className={cn("w-7 h-4 rounded-full transition-colors relative shadow-inner", gstEnabled ? "bg-slate-800" : "bg-slate-200")}>
                 <div className={cn("w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all shadow-sm", gstEnabled ? "left-3.5" : "left-0.5")} />
@@ -186,7 +186,7 @@ export default function CartPanel({
         </div>
 
         {/* Payment Methods (Tactile Pills) */}
-        <div className="flex flex-col gap-2 mt-2 border-t border-slate-200/50 pt-4">
+        <div className="flex flex-col gap-1.5 mt-1 border-t border-slate-200/50 pt-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Payment</span>
           <div className="flex flex-wrap gap-2">
             {paymentMethods.map(pm => (
@@ -207,7 +207,7 @@ export default function CartPanel({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 mt-2">
+        <div className="flex gap-2 mt-1">
           <button 
             className="flex-1 py-3.5 text-sm font-bold rounded-2xl text-white bg-rose-600 hover:bg-rose-700 shadow-[0_4px_14px_rgb(225,29,72,0.3)] hover:shadow-[0_6px_20px_rgb(225,29,72,0.4)] hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
             disabled={items.length === 0 || isLoading}

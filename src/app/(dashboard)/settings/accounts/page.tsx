@@ -272,12 +272,13 @@ export default function AccountManagementPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl relative border border-white/20 animate-scale-in">
             <button 
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+              type="button"
+              onClick={(e) => { e.preventDefault(); setShowModal(false); }}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors z-10"
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="p-8">
+            <div className="p-8 relative">
               <h2 className="text-xl font-extrabold text-slate-800 mb-6">{editingUser ? 'Edit User' : 'Invite User'}</h2>
               <form onSubmit={handleSaveUser} className="flex flex-col gap-5">
                 
