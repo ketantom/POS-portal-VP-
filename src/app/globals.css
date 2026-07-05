@@ -33,7 +33,15 @@
 @media print {
   @page {
     margin: 0;
-    size: auto;
+  }
+  
+  html, body {
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
   }
   
   /* Hide EVERYTHING by default */

@@ -5,6 +5,7 @@ import { useToast } from '@/components/Toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Plus, Trash2, Edit2, X, UserCheck } from 'lucide-react';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 interface UserData {
   id: string;
@@ -28,6 +29,7 @@ export default function AccountManagementPage() {
   // Form State
   const [formData, setFormData] = useState({
     email: '',
+    password: '',
     full_name: '',
     role: 'cashier',
     is_active: true
@@ -65,6 +67,7 @@ export default function AccountManagementPage() {
       setEditingUser(user);
       setFormData({
         email: user.email,
+        password: '',
         full_name: user.full_name || '',
         role: user.role,
         is_active: user.is_active
@@ -73,6 +76,7 @@ export default function AccountManagementPage() {
       setEditingUser(null);
       setFormData({
         email: '',
+        password: '',
         full_name: '',
         role: 'cashier',
         is_active: true
@@ -96,7 +100,46 @@ export default function AccountManagementPage() {
         if (error) throw error;
         addToast('User updated successfully', 'success');
       } else {
-         addToast('Notice: Inviting new users requires Supabase Admin API. For now, users must sign up on the /login page first.', 'info');
+         if (!formData.password) {
+           addToast('Password is required for new users', 'error');
+           setIsSaving(false);
+           return;
+         }
+         
+         const secondarySupabase = createSupabaseClient(
+           process.env.NEXT_PUBLIC_SUPABASE_URL!,
+           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+           { auth: { persistSession: false, autoRefreshToken: false } }
+         );
+
+         const { data, error: signUpError } = await secondarySupabase.auth.signUp({
+           email: formData.email,
+           password: formData.password,
+           options: {
+             data: {
+               full_name: formData.full_name
+             }
+           }
+         });
+
+         if (signUpError) throw signUpError;
+         if (!data.user) throw new Error('Failed to create user');
+
+         // Wait a moment for the profile trigger to run (if it exists)
+         await new Promise(resolve => setTimeout(resolve, 1000));
+
+         // Update or insert the profile with the correct role using the admin session
+         const { error: profileError } = await supabase.from('profiles').upsert({
+           id: data.user.id,
+           email: formData.email,
+           full_name: formData.full_name,
+           role: formData.role,
+           is_active: formData.is_active
+         });
+
+         if (profileError) throw profileError;
+         
+         addToast('User invited successfully!', 'success');
       }
       
       setShowModal(false);
@@ -242,6 +285,13 @@ export default function AccountManagementPage() {
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
                   <input required type="email" disabled={!!editingUser} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-400 focus:bg-white transition-all font-medium text-slate-800 shadow-sm disabled:opacity-50" placeholder="user@vijayaproducts.com" />
                 </div>
+
+                {!editingUser && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Temporary Password</label>
+                    <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-400 focus:bg-white transition-all font-medium text-slate-800 shadow-sm" placeholder="Minimum 6 characters" minLength={6} />
+                  </div>
+                )}
                 
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>

@@ -35,6 +35,7 @@ export default function ReportsPage() {
   const [accountStats, setAccountStats] = useState<AccountSummary[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [exportData, setExportData] = useState<any[]>([]);
 
   const { addToast } = useToast();
   const supabase = createClient();
@@ -56,13 +57,13 @@ export default function ReportsPage() {
       // Fetch Invoices within date range
       const { data: invoices, error } = await supabase
         .from('invoices')
-        .select(`
+          id,
+          invoice_number,
           total_amount, 
           payment_method, 
           created_at, 
           created_by,
           status
-        `)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .eq('status', 'completed');
@@ -76,12 +77,20 @@ export default function ReportsPage() {
         profileMap[p.id] = p;
       });
 
+      // Fetch Invoice Items
+      const invoiceIds = invoices?.map(inv => inv.id) || [];
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('*, products(sku_code)')
+        .in('invoice_id', invoiceIds);
+
       // Process Data
       let rev = 0;
       let orders = 0;
       const dailyMap: Record<string, DailySummary> = {};
       const payMap: Record<string, PaymentSummary> = {};
       const accMap: Record<string, AccountSummary> = {};
+      const csvRows: any[] = [];
 
       invoices?.forEach((inv: any) => {
         rev += inv.total_amount;
@@ -105,6 +114,38 @@ export default function ReportsPage() {
         if (!accMap[accKey]) accMap[accKey] = { accountName: accKey, total: 0, count: 0 };
         accMap[accKey].total += inv.total_amount;
         accMap[accKey].count++;
+
+        // CSV Export Rows
+        const items = invoiceItems?.filter(item => item.invoice_id === inv.id) || [];
+        if (items.length === 0) {
+          csvRows.push({
+            'Invoice No': inv.invoice_number,
+            'Date': format(new Date(inv.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            'Cashier': accKey,
+            'Payment Method': inv.payment_method || 'Unknown',
+            'Product Name': '',
+            'SKU': '',
+            'Quantity': '',
+            'Unit Price': '',
+            'Item Total': '',
+            'Invoice Total': inv.total_amount
+          });
+        } else {
+          items.forEach((item: any) => {
+            csvRows.push({
+              'Invoice No': inv.invoice_number,
+              'Date': format(new Date(inv.created_at), 'yyyy-MM-dd HH:mm:ss'),
+              'Cashier': accKey,
+              'Payment Method': inv.payment_method || 'Unknown',
+              'Product Name': item.product_name,
+              'SKU': Array.isArray(item.products) ? item.products[0]?.sku_code : item.products?.sku_code || '',
+              'Quantity': item.quantity,
+              'Unit Price': item.unit_price,
+              'Item Total': item.total_price,
+              'Invoice Total': inv.total_amount
+            });
+          });
+        }
       });
 
       setTotalRevenue(rev);
@@ -112,6 +153,7 @@ export default function ReportsPage() {
       setDailySales(Object.values(dailyMap).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
       setPaymentStats(Object.values(payMap).sort((a, b) => b.total - a.total));
       setAccountStats(Object.values(accMap).sort((a, b) => b.total - a.total));
+      setExportData(csvRows);
 
     } catch (error: any) {
       console.error(error);
@@ -122,15 +164,8 @@ export default function ReportsPage() {
   };
 
   const exportReport = () => {
-    if (dailySales.length === 0) return;
+    if (exportData.length === 0) return;
     
-    // Create a combined CSV export
-    const exportData = dailySales.map(day => ({
-      Date: day.date,
-      Orders: day.totalTransactions,
-      Revenue: day.totalSales
-    }));
-
     const csv = Papa.unparse(exportData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -168,7 +203,7 @@ export default function ReportsPage() {
           <button 
             onClick={exportReport}
             className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-bold shadow-[0_4px_14px_rgb(0,0,0,0.2)] hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm disabled:opacity-50"
-            disabled={isLoading || dailySales.length === 0}
+            disabled={isLoading || exportData.length === 0}
           >
             <Download className="w-4 h-4" />
             Export CSV

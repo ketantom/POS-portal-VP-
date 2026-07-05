@@ -150,20 +150,36 @@ export default function POSDashboard() {
       // 4. Update Stock Quantities (Simplified client-side loop for now)
       // Removed stock decrement as requested
 
-      addToast('Invoice generated successfully!', 'success');
-      
       // Success State
       setCurrentInvoice(insertedInvoice as Invoice);
       setCurrentInvoiceItems(invoiceItems as any as InvoiceItem[]);
       setShowReceipt(true);
-      setCart([]);
-      loadData(); // Refresh products & history
+      addToast('Invoice generated successfully!', 'success');
+      
+      // Refresh Data
+      loadData();
+      handleClearCart();
       
     } catch (error: any) {
-      console.error('Error generating invoice:', error);
       addToast(error.message || 'Failed to generate invoice', 'error');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    try {
+      // Delete items first (if no cascade)
+      await supabase.from('invoice_items').delete().eq('invoice_id', invoiceId);
+      // Delete invoice
+      const { error } = await supabase.from('invoices').delete().eq('id', invoiceId);
+      if (error) throw error;
+      
+      addToast('Invoice deleted successfully', 'success');
+      setShowReceipt(false);
+      loadData();
+    } catch (error: any) {
+      addToast(error.message || 'Failed to delete invoice', 'error');
     }
   };
 
@@ -267,6 +283,7 @@ export default function POSDashboard() {
           invoice={currentInvoice} 
           items={currentInvoiceItems} 
           onClose={() => setShowReceipt(false)} 
+          onDelete={handleDeleteInvoice}
         />
       )}
     </div>

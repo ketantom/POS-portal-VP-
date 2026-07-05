@@ -9,9 +9,10 @@ interface ReceiptProps {
   invoice: Invoice;
   items: InvoiceItem[];
   onClose?: () => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function Receipt({ invoice, items, onClose }: ReceiptProps) {
+export default function Receipt({ invoice, items, onClose, onDelete }: ReceiptProps) {
   const handlePrint = () => {
     window.print();
   };
@@ -28,20 +29,35 @@ export default function Receipt({ invoice, items, onClose }: ReceiptProps) {
     <>
       {/* SCREEN VIEW (Non-print) - Modal Overlay */}
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hide-on-print transition-all duration-300">
-        <div className="bg-slate-50 w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl relative border border-white/20 animate-scale-in">
+        <div className="bg-slate-50 w-full max-w-sm max-h-[90vh] flex flex-col rounded-[32px] overflow-hidden shadow-2xl relative border border-white/20 animate-scale-in">
           
-          {/* Close Button */}
-          {onClose && (
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-200/50 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors z-10"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          {/* Close & Delete Buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+            {onDelete && (
+              <button 
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this invoice? This cannot be undone.')) {
+                    onDelete(invoice.id);
+                  }
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-rose-100 hover:bg-rose-200 text-rose-600 transition-colors"
+                title="Delete Invoice"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            )}
+            {onClose && (
+              <button 
+                onClick={onClose}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200/50 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
 
           {/* Receipt Content */}
-          <div className="p-8">
+          <div className="p-8 overflow-y-auto custom-scrollbar flex-1 relative">
             <div className="text-center mb-6 relative">
               <div className="w-16 h-16 mx-auto mb-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-2">
                 <Image src="/logo.png" alt="Vijaya Products Logo" width={50} height={50} className="object-contain" priority />
@@ -114,7 +130,7 @@ export default function Receipt({ invoice, items, onClose }: ReceiptProps) {
             </div>
           </div>
 
-          <div className="p-4 bg-white border-t border-slate-100">
+          <div className="p-4 bg-white border-t border-slate-100 shrink-0">
             <button 
               onClick={handlePrint} 
               className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white font-bold py-3.5 rounded-2xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-[0_4px_14px_rgb(0,0,0,0.2)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.25)] active:scale-95"
