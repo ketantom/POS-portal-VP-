@@ -27,14 +27,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           return;
         }
 
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        if (profile && isMounted) {
-          setUserProfile(profile as Profile);
+        let finalProfile = profile;
+        if (!finalProfile) {
+           finalProfile = {
+             id: user.id,
+             email: user.email,
+             full_name: user.user_metadata?.full_name || 'Admin',
+             role: user.email === 'ketantom@gmail.com' ? 'super_admin' : 'cashier',
+             is_active: true
+           };
+        }
+
+        if (isMounted) {
+          setUserProfile(finalProfile as Profile);
         }
       } catch (error) {
         console.error('Error loading user profile:', error);

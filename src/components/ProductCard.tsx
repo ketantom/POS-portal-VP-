@@ -9,32 +9,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAdd }: ProductCardProps) {
-  const handleClick = (e: React.MouseEvent) => {
-    // Ripple effect logic (simplified for inline)
-    const button = e.currentTarget as HTMLElement;
-    const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
-
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${e.clientX - button.getBoundingClientRect().left - radius}px`;
-    circle.style.top = `${e.clientY - button.getBoundingClientRect().top - radius}px`;
-    circle.classList.add('ripple');
-
-    const rippleElement = button.getElementsByClassName('ripple')[0];
-    if (rippleElement) {
-      rippleElement.remove();
-    }
-
-    button.appendChild(circle);
-    onAdd(product);
-  };
-
   return (
     <div
-      onClick={handleClick}
+      onClick={() => onAdd(product)}
       className={cn(
-        'card relative overflow-hidden transition-all duration-300 card-interactive hover:border-[var(--primary)]'
+        'card relative overflow-hidden transition-all duration-300 card-interactive hover:border-[var(--primary)] cursor-pointer hover:shadow-md'
       )}
     >
       <div className="flex justify-between items-start">
@@ -51,16 +30,6 @@ export default function ProductCard({ product, onAdd }: ProductCardProps) {
           </div>
         </div>
       </div>
-
-       <style dangerouslySetInnerHTML={{__html: `
-        .ripple {
-          position: absolute;
-          border-radius: 50%;
-          transform: scale(0);
-          animation: ripple 0.6s linear;
-          background-color: rgba(220, 38, 38, 0.3); /* Primary color with opacity */
-        }
-      `}} />
     </div>
   );
 }
